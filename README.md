@@ -52,12 +52,23 @@ LifeAnnuity Duration (eff) @2%    : 9.48 years
 LifeAnnuity DV01 @2%              : 1.43 per 1bp
 ```
 
-**Interpretation:**
+**Interpretation**
 
-* Liability PV falls as interest rates rise (classic inverse price–rate relationship).
-* Deferral and mortality both reduce PV relative to an immediate annuity certain.
-* Mortality also shortens effective duration, since expected payments are front-loaded.
-* DV01 is positive, meaning liability values increase when rates fall.
+* **PV falls as rates rise:** 2% → 5% drops the annuity-certain PV from **1,631.97** to **1,232.90**.
+* **Deferral lowers PV:** deferred annuity PV at 2% = **1,476.67**, which is below the immediate annuity’s **1,631.97**.
+* **Mortality lowers PV and shortens duration:** life annuity PV at 2% = **1,504.60** (< **1,631.97**), and its effective duration (**9.48y**) is slightly lower than the certain annuity’s (**9.84y**).
+* **DV01 is positive (as expected for liabilities):**
+
+  * Annuity-certain DV01 @2% = **1.61** per 1 bp.
+  * Life annuity DV01 @2% = **1.43** per 1 bp.
+    Positive DV01 means **PV rises when rates fall**.
+
+### Quick consistency check
+
+For small shifts, $\text{DV01} \approx PV \times \text{Duration} \times 10^{-4}$.
+
+* Annuity-certain: $1{,}631.97 \times 9.84 \times 10^{-4} \approx 1.61$ ✅
+* Life annuity: $1{,}504.60 \times 9.48 \times 10^{-4} \approx 1.43$ ✅
 
 ---
 
