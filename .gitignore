@@ -1,0 +1,17 @@
+# venv & python
+.venv/
+__pycache__/
+*.pyc
+
+# tooling & caches
+.mypy_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# build
+build/
+dist/
+*.egg-info/
