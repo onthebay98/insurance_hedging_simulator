@@ -8,6 +8,13 @@ version = "0.0.1"
 description = "MVP engine for insurance liability PV, duration/DV01, and hedging analytics"
 requires-python = ">=3.11"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["insurance_hedging_simulator*"]
+
 [tool.black]
 line-length = 100
 
