@@ -1,4 +1,3 @@
-# Ensure src/ is on sys.path for direct runs
 import sys, pathlib
 repo_root = pathlib.Path(__file__).resolve().parents[1]
 src_path = repo_root / "src"
@@ -15,7 +14,7 @@ from insurance_hedging_simulator.curve_risk import (
 
 def main():
     # Example curve (continuous zeros), shaped like a mild upward slope
-    pillars = [0.5, 1, 2, 5, 10, 30]
+    pillars = [0.5, 1, 2, 5, 10, 20]
     zeros   = [0.030, 0.031, 0.033, 0.036, 0.038, 0.039]
     curve = ZeroCurve(pillars, zeros)
 
@@ -28,7 +27,7 @@ def main():
         pv   = obj.pv(curve=curve)
         dpar = effective_duration_curve(obj, curve, bp=1.0)
         d01  = dv01_curve(obj, curve, bp=1.0)
-        krds = keyrate_durations(obj, curve, key_indices=[0,2,3,5], bp=1.0)  # e.g., 0.5y, 2y, 5y, 30y
+        krds = keyrate_durations(obj, curve, key_indices=[0,1,2,3,4,5], bp=1.0)  # e.g., 0.5y, 2y, 5y, 20y
 
         print(f"\n{name} (curve-based)")
         print(f"PV (base): {pv:,.2f}")

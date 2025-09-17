@@ -111,23 +111,19 @@ Key-Rate Durations (per 1bp):
 
 ### C) Hedging Demo — DV01-Matched Swap (`examples/hedge_demo.py`)
 
-> Ensure `hedge_swap.size_dv01_hedge_payer_fixed` uses **DV01 per notional = swap annuity / 10,000**.
-
-**Your base run (before the sizing fix) showed the hedge P\&L near zero under ±100 bp**, which indicated under-sizing. After applying the fix, expect:
-
 ```text
 Base PV (liability): 1,378.71
 Parallel DV01 (liability): 1.27 per 1bp
 
-Sized hedge: payer-fixed 10y, notional ~ 1,543.26
+Sized hedge: payer-fixed 10y, notional ~ 1,543.17
 Fixed rate locked at par: 3.842%
 
-Stress P&L (currency units), indicative:
-Parallel +100bp     Liability: ~ -119     Hedge: ~ +125     Net: near 0
-Parallel -100bp     Liability: ~ +135     Hedge: ~ -137     Net: near 0
-+25bp @ 2y          Liability:   -1.21    Hedge:   ~ +0.7   Net: ~ -0.5
-+25bp @ 5y          Liability:   -4.52    Hedge:   ~ +2.7   Net: ~ -1.8
-+25bp @ 30y         Liability:   -5.98    Hedge:     ~ 0.0  Net: ~ -6.0
+Stress P&L (currency units):
+Parallel +100bp     Liability:   -119.30  Hedge:    124.87  Net:      5.57
+Parallel -100bp     Liability:    135.48  Hedge:   -137.14  Net:     -1.66
++25bp @ 2y          Liability:     -1.21  Hedge:      0.72  Net:     -0.49
++25bp @ 5y          Liability:     -4.52  Hedge:      2.68  Net:     -1.84
++25bp @ 30y         Liability:     -5.98  Hedge:      0.00  Net:     -5.98
 ```
 
 **Why this makes sense**
