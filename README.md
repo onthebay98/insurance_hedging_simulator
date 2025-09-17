@@ -128,12 +128,11 @@ Parallel -100bp           135.03       -120.39         14.64
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
-pytest  # run tests
+pytest -q  # run full suite (curve, swaps, DV01, KR01, stress, hedge)
 
 # run examples
 python examples/liability_demo.py
 python examples/risk_exposures_demo.py
-python examples/hedge_demo.py
 python examples/end_to_end_demo.py
 ```
 
@@ -156,8 +155,14 @@ src/insurance_hedging_simulator/
   hedge_swap.py                  # swap annuity, par rate, PV, sizing
   stress.py                      # curve shocks & P&L attribution
 tests/
-  test_hedge_sizing.py           # hedge sizing validation
-  test_curve_parity.py           # curve math checks
+  test_curve_basics.py           # ZeroCurve interpolation & DF properties
+  test_curve_equals_flat_when_zeros_flat.py  # flat vs curve parity
+  test_dv01_duration_identity.py # DV01 ≈ PV × Duration consistency
+  test_swaps_par_and_sign.py     # par swap PV=0, payer-fixed DV01<0
+  test_kr01_no_divzero.py        # KR01s safe for par swaps
+  test_stress_runner_multihedge.py # multi-swap netting correctness
+  test_two_node_hedge_sizing.py  # 10y/20y hedge neutralizes KR01s
+  test_life_vs_certain.py        # mortality reduces PV vs certain annuity
 pyproject.toml / requirements.txt
 README.md
 ```
