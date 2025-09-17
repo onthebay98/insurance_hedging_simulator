@@ -31,8 +31,8 @@ def main():
 
     dur_ac  = effective_duration(ac, r_low)
     d01_ac  = dv01(ac, r_low)
-    dur_lai = effective_duration(lai, r_low)
-    d01_lai = dv01(lai, r_low)
+    # dur_lai = effective_duration(lai, r_low)
+    # d01_lai = dv01(lai, r_low)
 
     print("\n== Liability demo (annual payments, continuous comp) ==")
     print(f"AnnuityCertain PV @2% : {fmt(pv_ac_low)}")
@@ -42,8 +42,8 @@ def main():
     print()
     print(f"AnnuityCertain Duration (eff) @2% : {dur_ac:,.2f} years")
     print(f"AnnuityCertain DV01 @2%           : {d01_ac:,.2f} per 1bp")
-    print(f"LifeAnnuity Duration (eff) @2%    : {dur_lai:,.2f} years")
-    print(f"LifeAnnuity DV01 @2%              : {d01_lai:,.2f} per 1bp")
+    # print(f"LifeAnnuity Duration (eff) @2%    : {dur_lai:,.2f} years")
+    # print(f"LifeAnnuity DV01 @2%              : {d01_lai:,.2f} per 1bp")
 
 if __name__ == "__main__":
     main()
