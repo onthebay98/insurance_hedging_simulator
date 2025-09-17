@@ -5,7 +5,7 @@ sys.path.insert(0, str(repo_root / "src"))
 from insurance_hedging_simulator.scenarios import make_curve, generate_vasicek_scenarios
 from insurance_hedging_simulator.liabilities import AnnuityCertain
 
-pillars = [0.5, 1, 2, 5, 10, 30]
+pillars = [0.5, 1, 2, 5, 10, 20]
 curve_up = make_curve("upward", pillars, base=0.03, slope=0.01)
 
 ac = AnnuityCertain(payment=100.0, n_payments=20)

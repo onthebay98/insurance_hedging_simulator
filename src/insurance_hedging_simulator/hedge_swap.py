@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Tuple
 from .curve import ZeroCurve
+import math
+
 
 def build_schedule(maturity_years: int, payments_per_year: int = 1) -> Tuple[List[float], List[float]]:
     """Annual by default. Returns (pay_times, accruals)."""
@@ -48,6 +50,21 @@ class SizedSwap:
     notional: float
     fixed_rate: float       # locked at base par
 
+    def pv(self, curve: ZeroCurve) -> float:
+        """
+        PV for this swap under the given curve. Uses the same payer-fixed
+        pricing function and flips the sign if this is receiver-fixed.
+        """
+        base = swap_pv_payer_fixed(
+            curve=curve,
+            notional=self.notional,
+            maturity_years=self.maturity_years,
+            payments_per_year=self.payments_per_year,
+            fixed_rate=self.fixed_rate,
+        )
+        return base if self.pay_fixed else -base
+
+
 def size_dv01_hedge_payer_fixed(
     liability_dv01: float,
     curve: ZeroCurve,
@@ -70,3 +87,5 @@ def size_dv01_hedge_payer_fixed(
         notional=notional,
         fixed_rate=fixed,
     )
+
+

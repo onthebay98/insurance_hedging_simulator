@@ -33,3 +33,20 @@ def keyrate_durations(obj, curve: ZeroCurve, key_indices: List[int], bp: float =
         d = - (pv_up - pv_dn) / (2 * pv0 * dr)
         krd[curve.pillars[idx]] = d
     return krd
+
+def keyrate_dv01s(obj, curve: ZeroCurve, key_indices: List[int], bp: float = 1.0) -> Dict[float, float]:
+    """
+    Key-rate DV01s (KR01s): dollar PV change per 1bp bump at selected pillar indices.
+    Works even when PV0 == 0 (e.g., par swaps), unlike keyrate_durations which normalizes by PV.
+    Returns {tenor_years: dv01_per_1bp}.
+    """
+    dr = bp / 10000.0
+    kr01 = {}
+    for idx in key_indices:
+        c_up = curve.bumped_key_index(idx, +dr)
+        c_dn = curve.bumped_key_index(idx, -dr)
+        pv_up = obj.pv(curve=c_up)
+        pv_dn = obj.pv(curve=c_dn)
+        dv01 = (pv_dn - pv_up) / 2.0
+        kr01[curve.pillars[idx]] = dv01
+    return kr01

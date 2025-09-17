@@ -1,6 +1,13 @@
 # Insurance Hedging Simulator
 
-A quantitative prototype for modeling insurance liabilities, valuing them under interest rate scenarios, and computing risk sensitivities (parallel duration, DV01, and key-rate durations). It mirrors core tasks in **insurance hedging** and **fixed-income risk analytics**.
+A quantitative sandbox for modeling insurance liabilities, valuing them on yield curves, and managing their **interest rate risk**.
+It mirrors core tasks in **insurance asset-liability management (ALM)** and **fixed-income risk analytics**:
+
+* Model liabilities like annuities.
+* Value them under zero-coupon curves.
+* Compute risk sensitivities — parallel duration, DV01, key-rate exposures.
+* Build swap hedges to **neutralize specific curve nodes**.
+* Stress test the combined liability + hedge portfolio.
 
 ---
 
@@ -8,37 +15,34 @@ A quantitative prototype for modeling insurance liabilities, valuing them under 
 
 ### Liability Modeling
 
-* **Annuity Certain (Immediate)** — fixed annual payments for $N$ years
-* **Deferred Annuity** — fixed annual payments starting after a deferral period
-* **Life Annuity (Immediate)** — payments contingent on survival (Gompertz–Makeham)
+* **Annuity Certain (Immediate)** — fixed annual payments for N years
+* **Deferred Annuity Certain** — same, but payments start after a deferral period
+* **Life Annuity (Immediate)** — contingent on survival (Gompertz–Makeham mortality)
 
-### Discounting & Curves
+### Curves & Valuation
 
-* **Flat-rate valuation** (continuous or annual compounding)
-* **Zero-curve valuation** via `ZeroCurve` (continuous-compounded zeros with interpolation)
+* **Flat-rate valuation** (continuous/annual compounding)
+* **Zero-curve valuation** (`ZeroCurve` with interpolation between pillars)
 
 ### Risk Analytics
 
-* **Effective Duration (parallel)** — bump-and-reprice under flat or full curve
-* **DV01 (parallel)** — PV change per 1 bp parallel move
-* **Key-Rate Durations (KRDs)** — tenor-specific duration via local pillar bumps
+* **Effective Duration** — years of sensitivity to a parallel shift
+* **DV01** — \$ change per 1bp parallel shift in the curve
+* **Key-Rate Durations (KRDs)** — sensitivity to local bumps at specific tenors
+* **Key-Rate DV01s (KR01s)** — dollar exposure per 1bp at specific nodes
 
-### Simple Hedging (DV01 Matching)
+### Hedging
 
-* **Plain-vanilla 10y interest-rate swap** (annual fixed)
-* Size **payer-fixed** notional to offset a **positive** liability DV01
-* **Stress tests**: parallel ±100 bp and key-rate +25 bp at 2y/5y/30y
+* **Plain-vanilla swaps** (payer-fixed at par)
+* **DV01-matching hedge**: size a single swap to offset parallel risk
+* **Node-targeted hedging**: size multiple swaps (e.g., 10y & 20y) to neutralize curve-shape risk
+* Output hedge notionals, fixed rates, and net exposures
 
-### Scenario Generation (optional module)
+### Stress Testing
 
-* Parametric curve shapes (**flat / upward / inverted**)
-* **Vasicek** short-rate paths and derived zero curves
-
-### Engineering Hygiene
-
-* Modern Python package (`src/` layout, `pyproject.toml`, `pytest.ini`)
-* Unit tests (monotonicities, parity, scenarios)
-* **GitHub Actions** CI (`.github/workflows/ci.yml`) runs tests on push/PR
+* **Parallel shifts** (±100bp)
+* **Key-rate bumps** (e.g., +25bp at 2y, 5y, 10y, 20y)
+* **P\&L attribution**: liability, hedge, and net effect
 
 ---
 
@@ -47,25 +51,19 @@ A quantitative prototype for modeling insurance liabilities, valuing them under 
 ### A) Flat-Rate Demo (`examples/liability_demo.py`)
 
 ```text
-== Liability demo (annual payments, continuous comp) ==
 AnnuityCertain PV @2% : 1,631.97
 AnnuityCertain PV @5% : 1,232.90
-DeferredAnnuity PV @2%: 1,476.67 (deferral lowers PV)
-LifeAnnuity PV @2%    : 1,504.60 (mortality lowers PV)
+DeferredAnnuity PV @2%: 1,476.67
+LifeAnnuity PV @2%    : 1,504.60
 
 AnnuityCertain Duration (eff) @2% : 9.84 years
 AnnuityCertain DV01 @2%           : 1.61 per 1bp
-LifeAnnuity Duration (eff) @2%    : 9.48 years
-LifeAnnuity DV01 @2%              : 1.43 per 1bp
 ```
 
-**Interpretation:**
-
-* **PV falls as rates rise** (2% → 5%): 1,631.97 → 1,232.90.
-* **Deferred < Life**: deferral cuts out *guaranteed early payments* (head-end), which sharply reduces PV.
-* **Life < Certain**: mortality reduces expected later payments, lowering both PV and duration.
-* **DV01 positive**: liability PV falls when rates rise (and rises when rates fall).
-* **Consistency check**: $\text{DV01} \approx PV \times \text{Duration} \times 10^{-4}$ holds.
+* PV falls as rates rise (2% → 5%).
+* Deferred annuity < life annuity (deferral cuts out guaranteed early payments).
+* Life annuity < certain (mortality reduces PV and duration).
+* DV01 ≈ PV × Duration × 1e-4 consistency check holds.
 
 ---
 
@@ -73,63 +71,53 @@ LifeAnnuity DV01 @2%              : 1.43 per 1bp
 
 ```text
 AnnuityCertain (curve-based)
-PV (base): 1,378.71
-Parallel Duration: 9.21  |  DV01: 1.27 per 1bp
+PV (base): 1,376.30
+Parallel Duration: 9.20  |  DV01: 1.27 per 1bp
 Key-Rate Durations (per 1bp):
-   0.5y : -0.000
-   2.0y : 0.351
-   5.0y : 1.317
-  30.0y : 1.749
-
-DeferredAnnuity (curve-based)
-PV (base): 1,133.23
-Parallel Duration: 14.20  |  DV01: 1.61 per 1bp
-Key-Rate Durations (per 1bp):
-   0.5y : -0.000
-   2.0y : -0.000
-   5.0y : 0.950
-  30.0y : 4.836
-
-LifeAnnuity (curve-based)
-PV (base): 1,279.58
-Parallel Duration: 8.87  |  DV01: 1.14 per 1bp
-Key-Rate Durations (per 1bp):
-   0.5y : -0.000
-   2.0y : 0.372
-   5.0y : 1.367
-  30.0y : 1.590
+   2y : 0.351
+   5y : 1.320
+  10y : 3.973
+  20y : 3.482
 ```
 
-**Interpretation (curve):**
-
-* Parallel DV01/duration line up with flat-rate intuition at similar yields.
-* Deferred annuity’s KRD mass sits in **long tenors (30y)** → back-loaded cash flows.
-* Life annuity is slightly **front-loaded** vs. certain → lower duration and modestly shorter-tenor KRDs.
-* Consistency check: $PV \times \text{Duration} \times 10^{-4}$ ≈ DV01 for each line item.
+* Curve shows where cashflow risk lives:
+  – Early payments → short-tenor exposure.
+  – Later payments → 10y/20y exposures dominate.
 
 ---
 
-### C) Hedging Demo — DV01-Matched Swap (`examples/hedge_demo.py`)
+### C) Node-Targeted Hedging (`examples/end_to_end_demo.py`)
 
 ```text
-Base PV (liability): 1,378.71
-Parallel DV01 (liability): 1.27 per 1bp
+=== End-to-End: Liability → Node-Targeted Hedge → Stress ===
+Base PV (liability): 1,376.30
+Parallel Duration (liability): 9.20 years  |  DV01: 1.27 per 1bp
+Node 10y — KRD: 3.973  |  KR01: 0.547
+Node 20y — KRD: 3.482  |  KR01: 0.479
 
-Sized hedge: payer-fixed 10y, notional ~ 1,543.17
-Fixed rate locked at par: 3.842%
+=== Hedge Portfolio (payer-fixed at par) ===
+10y swap — notional: 600.26  |  fixed: 3.842%
+20y swap — notional: 433.58  |  fixed: 3.935%
+Parallel DV01 — Liability: 1.27, 10y: -0.51, 20y: -0.61  →  Net: +0.14 per 1bp
+Net KR01s (per 1bp): 10y=-0.0000  20y=+0.0000
 
-Stress P&L (currency units):
-Parallel +100bp     Liability:   -119.30  Hedge:    124.87  Net:      5.57
-Parallel -100bp     Liability:    135.48  Hedge:   -137.14  Net:     -1.66
-+25bp @ 2y          Liability:     -1.21  Hedge:      0.72  Net:     -0.49
-+25bp @ 5y          Liability:     -4.52  Hedge:      2.68  Net:     -1.84
-+25bp @ 30y         Liability:     -5.98  Hedge:      0.00  Net:     -5.98
+=== Stress P&L (currency units) ===
+Shock                  Liability         Hedge           Net
+------------------------------------------------------------
+Parallel +100bp          -118.93        104.89        -14.03
+Parallel -100bp           135.03       -120.39         14.64
++25bp @ 2y                 -1.21          0.48         -0.72
++25bp @ 5y                 -4.52          1.81         -2.71
++25bp @ 10y               -13.54         13.51         -0.03
++25bp @ 20y               -11.79         11.71         -0.09
 ```
 
-**Why this makes sense**
+**Interpretation**
 
-* DV01 matching knocks down **parallel** risk; residuals are convexity/tenor mismatches.
-* A single 10y swap won’t hedge a **30y** key-rate bump; use multiple maturities to target curve shape if needed.
+* Hedge works exactly where targeted (10y & 20y nodes → Net ≈ 0).
+* Parallel risk largely hedged, though some residual remains.
+* Short-end (2y/5y) exposures still open → could add more instruments.
+* This mirrors **real-world ALM**: you can’t hedge everything with one trade; you choose instruments to match exposures at key tenors.
 
 ---
 
@@ -139,15 +127,14 @@ Parallel -100bp     Liability:    135.48  Hedge:   -137.14  Net:     -1.66
 # Python 3.12+ recommended
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
 pip install -e .
-pytest
+pytest  # run tests
 
 # run examples
 python examples/liability_demo.py
 python examples/risk_exposures_demo.py
 python examples/hedge_demo.py
-python examples/scenarios_demo.py   # optional; uses scenarios.py
+python examples/end_to_end_demo.py
 ```
 
 ---
@@ -156,31 +143,22 @@ python examples/scenarios_demo.py   # optional; uses scenarios.py
 
 ```
 .github/workflows/
-  ci.yml                         # GitHub Actions: run tests on push/PR
+  ci.yml                         # GitHub Actions CI (tests on push/PR)
 examples/
-  __init__.py
-  liability_demo.py              # PV, duration, DV01 under flat rates
-  risk_exposures_demo.py         # PV, DV01, KRDs under a zero curve
-  hedge_demo.py                  # DV01-matched 10y swap; stress P&L
-  scenarios_demo.py              # optional: parametric curves & Vasicek
-src/
-  insurance_hedging_simulator/
-    __init__.py                  # exposes top-level API
-    liabilities.py               # annuity models + survival
-    risk_helpers.py              # flat-rate duration/DV01 helpers
-    curve.py                     # ZeroCurve (continuous zeros, interpolation)
-    curve_risk.py                # DV01 (curve), parallel duration, KRDs
-    hedge_swap.py                # swap annuity, par rate, DV01 sizing (fixed)
-    stress.py                    # simple parallel/key-rate shocks & P&L
-    scenarios.py                 # optional: parametric curves & Vasicek paths
+  liability_demo.py              # Flat-rate PV, duration, DV01
+  risk_exposures_demo.py         # Curve-based DV01 & KRDs
+  hedge_demo.py                  # Single DV01-matching swap
+  end_to_end_demo.py             # Node-targeted hedging (10y & 20y)
+src/insurance_hedging_simulator/
+  liabilities.py                 # annuity models (certain, deferred, life)
+  curve.py                       # ZeroCurve with interpolation
+  curve_risk.py                  # DV01, duration, KRDs, KR01s
+  hedge_swap.py                  # swap annuity, par rate, PV, sizing
+  stress.py                      # curve shocks & P&L attribution
 tests/
-  test_quickcheck.py
-  test_curve_parity.py
-  test_scenarios.py              # if using scenarios.py
-pyproject.toml
-pytest.ini
-Makefile
-requirements.txt
+  test_hedge_sizing.py           # hedge sizing validation
+  test_curve_parity.py           # curve math checks
+pyproject.toml / requirements.txt
 README.md
 ```
 
@@ -188,9 +166,10 @@ README.md
 
 ## 🎯 Why This Matters
 
-This project shows you can:
+This project demonstrates a **miniature ALM workflow**:
 
-1. Model insurance liabilities,
-2. Value them on realistic curves,
-3. Quantify **where** rate risk lives (overall and by tenor), and
-4. Size a **plain, explainable hedge** that neutralizes first-order exposure—then communicate residual curve risk.
+1. **Model** the liability cashflows.
+2. **Value** them under a realistic zero curve.
+3. **Quantify** interest rate risk by tenor (DV01, KRD, KR01).
+4. **Construct** hedge portfolios (swaps) to neutralize exposures.
+5. **Validate** under stress scenarios.
