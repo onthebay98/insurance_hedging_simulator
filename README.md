@@ -110,13 +110,3 @@ insurance_hedging_simulator/
 ```
 
 ---
-
-## 🎯 Why This Matters
-
-Insurance companies promise long-term cash flows (e.g., annuities, life insurance benefits).
-
-* Their liabilities are highly sensitive to interest rates.
-* Hedging programs use fixed income instruments and derivatives (swaps, futures) to stabilize surplus.
-* This project demonstrates the **first step**: modeling liabilities and quantifying rate risk.
-
-It highlights both **technical engineering** (clean, testable Python code) and **quantitative finance skills** (PV, duration, DV01, mortality models) — directly aligned with roles in insurance hedging and fixed income analytics.
