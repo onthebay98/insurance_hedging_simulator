@@ -74,6 +74,7 @@ class DeferredAnnuityCertain:
 
 @dataclass
 class GompertzMakeham:
+    # says likelihood of death is a combination of age and some independent variable
     A: float = 0.0005  # age-independent hazard
     B: float = 0.00003
     c: float = 1.08

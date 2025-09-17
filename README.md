@@ -59,12 +59,13 @@ LifeAnnuity Duration (eff) @2%    : 9.48 years
 LifeAnnuity DV01 @2%              : 1.43 per 1bp
 ```
 
-**Interpretation (flat):**
+**Interpretation:**
 
-* PV falls as rates rise (2% → 5%): 1,631.97 → 1,232.90.
-* Deferred < Immediate; Life < Certain (mortality lowers PV and duration).
-* DV01 is positive → liability PV rises when rates fall.
-* Consistency: $\text{DV01} \approx PV \times \text{Duration} \times 10^{-4}$ holds.
+* **PV falls as rates rise** (2% → 5%): 1,631.97 → 1,232.90.
+* **Deferred < Life**: deferral cuts out *guaranteed early payments* (head-end), which sharply reduces PV.
+* **Life < Certain**: mortality reduces expected later payments, lowering both PV and duration.
+* **DV01 positive**: liability PV falls when rates rise (and rises when rates fall).
+* **Consistency check**: $\text{DV01} \approx PV \times \text{Duration} \times 10^{-4}$ holds.
 
 ---
 
