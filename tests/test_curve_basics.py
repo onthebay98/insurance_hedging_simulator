@@ -1,15 +1,18 @@
 import math
 from math import isclose
+
 from insurance_hedging_simulator.curve import ZeroCurve
+
 
 def test_df_trivial_t0_is_one():
     curve = ZeroCurve([1, 2], [0.03, 0.04])
     assert curve.df(0.0) == 1.0
     assert curve.df(-1.0) == 1.0
 
+
 def test_df_endpoint_behavior_and_interpolation():
     pillars = [0.5, 1, 2, 5]
-    zeros   = [0.030, 0.031, 0.033, 0.036]
+    zeros = [0.030, 0.031, 0.033, 0.036]
     curve = ZeroCurve(pillars, zeros)
 
     # below first pillar → uses first zero

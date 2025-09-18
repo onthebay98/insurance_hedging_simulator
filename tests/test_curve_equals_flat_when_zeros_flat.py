@@ -1,7 +1,10 @@
 from insurance_hedging_simulator.liabilities import (
-    AnnuityCertain, DeferredAnnuityCertain, LifeAnnuityImmediate
+    AnnuityCertain,
+    DeferredAnnuityCertain,
+    LifeAnnuityImmediate,
 )
-from insurance_hedging_simulator.risk_helpers import effective_duration, dv01
+from insurance_hedging_simulator.risk_helpers import dv01, effective_duration
+
 
 def test_quickcheck_monotonicity():
     r_low, r_high = 0.02, 0.05
@@ -16,6 +19,7 @@ def test_quickcheck_monotonicity():
 
     lai = LifeAnnuityImmediate(payment=C, n_payments=N, issue_age=age)
     assert lai.pv(r_low) < ac.pv(r_low)
+
 
 def test_duration_dv01_signs():
     r = 0.03

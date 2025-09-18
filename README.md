@@ -1,12 +1,11 @@
 # Insurance Hedging Simulator
 
-A quantitative sandbox for modeling insurance liabilities, valuing them on yield curves, and managing their **interest rate risk**.
-It mirrors core tasks in **insurance asset-liability management (ALM)** and **fixed-income risk analytics**:
+A quantitative sandbox for modeling insurance liabilities, valuing them on yield curves, and managing their interest rate risk. Core tasks:
 
 * Model liabilities like annuities.
 * Value them under zero-coupon curves.
 * Compute risk sensitivities — parallel duration, DV01, key-rate exposures.
-* Build swap hedges to **neutralize specific curve nodes**.
+* Build swap hedges to neutralize specific curve nodes.
 * Stress test the combined liability + hedge portfolio.
 
 ---

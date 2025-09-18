@@ -1,18 +1,18 @@
 .PHONY: install format lint test quickcheck
 
 install:
-\tpython -m pip install --upgrade pip
-\tpip install -r requirements.txt
+	python -m pip install --upgrade pip
+	pip install -r requirements.txt
 
 format:
-\tblack src tests
-\tisort src tests
+	black src tests
+	isort src tests
 
 lint:
-\tmypy src
+	mypy src
 
 test:
-\tpytest
+	pytest
 
 quickcheck:
-\tpython -m pytest -q -k quickcheck -s
+	python -m pytest -q -k quickcheck -s

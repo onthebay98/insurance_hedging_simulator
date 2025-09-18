@@ -1,7 +1,8 @@
 # src/insurance_hedging_simulator/liabilities.py
-from dataclasses import dataclass, field
-from typing import List, Tuple, Literal, Optional, overload
 import math
+from dataclasses import dataclass, field
+from typing import List, Literal, Optional, Tuple, overload
+
 from .curve import ZeroCurve
 
 Compounding = Literal["continuous", "annual"]
@@ -85,7 +86,7 @@ class GompertzMakeham:
             return 1.0
         if self.c <= 0 or self.c == 1.0:
             raise ValueError("c must be > 0 and != 1")
-        return math.exp(-self.A * t - (self.B / math.log(self.c)) * (self.c ** (x + t) - self.c ** x))
+        return math.exp(-self.A * t - (self.B / math.log(self.c)) * (self.c ** (x + t) - self.c**x))
 
 
 @dataclass

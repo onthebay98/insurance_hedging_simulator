@@ -1,11 +1,11 @@
 from .liabilities import (
     AnnuityCertain,
     DeferredAnnuityCertain,
-    LifeAnnuityImmediate,
     GompertzMakeham,
+    LifeAnnuityImmediate,
     discount_factor,
 )
-from .risk_helpers import effective_duration, dv01
+from .risk_helpers import dv01, effective_duration
 
 __all__ = [
     "AnnuityCertain",

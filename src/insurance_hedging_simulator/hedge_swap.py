@@ -1,10 +1,13 @@
+import math
 from dataclasses import dataclass
 from typing import List, Tuple
+
 from .curve import ZeroCurve
-import math
 
 
-def build_schedule(maturity_years: int, payments_per_year: int = 1) -> Tuple[List[float], List[float]]:
+def build_schedule(
+    maturity_years: int, payments_per_year: int = 1
+) -> Tuple[List[float], List[float]]:
     """Annual by default. Returns (pay_times, accruals)."""
     n = maturity_years * payments_per_year
     accrual = 1.0 / payments_per_year
@@ -12,9 +15,11 @@ def build_schedule(maturity_years: int, payments_per_year: int = 1) -> Tuple[Lis
     accruals = [accrual] * n
     return times, accruals
 
+
 def swap_annuity(curve: ZeroCurve, pay_times: List[float], accruals: List[float]) -> float:
     """Sum_i accrual_i * DF(t_i)."""
     return sum(a * curve.df(t) for t, a in zip(pay_times, accruals))
+
 
 def par_swap_rate(curve: ZeroCurve, maturity_years: int, payments_per_year: int = 1) -> float:
     """K = (1 - DF(T)) / annuity."""
@@ -22,6 +27,7 @@ def par_swap_rate(curve: ZeroCurve, maturity_years: int, payments_per_year: int 
     ann = swap_annuity(curve, pay_times, accruals)
     T = pay_times[-1]
     return (1.0 - curve.df(T)) / ann
+
 
 def swap_pv_payer_fixed(
     curve: ZeroCurve,
@@ -42,13 +48,14 @@ def swap_pv_payer_fixed(
     pv_fixed = notional * fixed_rate * ann
     return pv_float - pv_fixed
 
+
 @dataclass
 class SizedSwap:
     maturity_years: int
     payments_per_year: int
-    pay_fixed: bool         # True = payer-fixed, False = receiver-fixed
+    pay_fixed: bool  # True = payer-fixed, False = receiver-fixed
     notional: float
-    fixed_rate: float       # locked at base par
+    fixed_rate: float  # locked at base par
 
     def pv(self, curve: ZeroCurve) -> float:
         """
@@ -77,7 +84,7 @@ def size_dv01_hedge_payer_fixed(
     """
     pay_times, accruals = build_schedule(maturity_years, payments_per_year)
     ann = swap_annuity(curve, pay_times, accruals)
-    dv01_per_notional = ann / 10000.0            # <-- convert bp to decimal
+    dv01_per_notional = ann / 10000.0  # <-- convert bp to decimal
     notional = liability_dv01 / dv01_per_notional
     fixed = par_swap_rate(curve, maturity_years, payments_per_year)
     return SizedSwap(
@@ -87,5 +94,3 @@ def size_dv01_hedge_payer_fixed(
         notional=notional,
         fixed_rate=fixed,
     )
-
-
